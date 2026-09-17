@@ -1,161 +1,143 @@
+import sys
+from pathlib import Path
+
 import streamlit as st
 
-from src.agent.answer import answer_question
+
+# ============================================================
+# Project path setup
+# ============================================================
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+
+from src.agent.advisor_agent import run_agent
 from src.receiver.retriever import retrieve
 
 
-# ---------------------------------------------------------
+# ============================================================
 # Page configuration
-# ---------------------------------------------------------
+# ============================================================
 
 st.set_page_config(
     page_title="Wealth Advisor Assistant",
-    page_icon="💼",
+    page_icon="📊",
     layout="wide",
 )
 
 
-# ---------------------------------------------------------
+# ============================================================
 # Header
-# ---------------------------------------------------------
+# ============================================================
 
 st.title("Wealth Advisor Assistant")
 
 st.caption(
-    "RAG-powered assistant for client portfolios, "
-    "complaints, correspondence and investment documents."
+    "Agentic RAG prototype using structured portfolio data, "
+    "document retrieval, reranking, and grounded LLM responses."
 )
 
 
-# ---------------------------------------------------------
+# ============================================================
 # Sidebar
-# ---------------------------------------------------------
+# ============================================================
 
 with st.sidebar:
 
-    st.header("Search Settings")
+    st.header("Query Settings")
 
     client_id = st.text_input(
-        "Client ID",
+        "Client ID (optional)",
         placeholder="e.g. CL002",
-        help=(
-            "Optional. Restricts document retrieval "
-            "to a specific client."
-        ),
     )
 
     top_k = st.slider(
-        "Retrieved documents",
-        min_value=1,
+        "Retrieved document evidence",
+        min_value=3,
         max_value=10,
         value=5,
     )
 
     st.divider()
 
-    st.subheader("System")
+    st.subheader("System Components")
 
-    st.write("Structured data: SQLite")
-    st.write("Vector database: ChromaDB")
-    st.write("Embeddings: MiniLM")
-    st.write("LLM: Groq")
+    st.markdown(
+        """
+        - SQLite structured data
+        - Chroma vector database
+        - MiniLM embeddings
+        - CrossEncoder reranking
+        - Groq LLM
+        - Agentic function tools
+        """
+    )
 
     st.divider()
 
-    st.caption(
-        "Answers are generated only from retrieved evidence."
-    )
+    st.subheader("Example Questions")
 
+    example_questions = [
+        (
+            "Does Robert Chua's APEX autocallable "
+            "note raise any suitability concerns?"
+        ),
+        (
+            "How much LRS remittance headroom does "
+            "Arjun Mehta have left?"
+        ),
+        (
+            "What happened with James Sullivan's "
+            "request to de-risk his portfolio?"
+        ),
+        (
+            "Does Park Ji-hoon's 35% allocation to "
+            "the APEX Autocallable Note breach firm policy?"
+        ),
+        (
+            "What is the SRI rating and minimum investment "
+            "for the APAC Stable Income Money Market Fund?"
+        ),
+    ]
 
-# ---------------------------------------------------------
-# Example questions
-# ---------------------------------------------------------
-
-st.subheader("Example Questions")
-
-example_col1, example_col2, example_col3 = st.columns(3)
-
-with example_col1:
-    if st.button(
-        "Robert Chua complaint",
-        use_container_width=True,
+    for index, example in enumerate(
+        example_questions,
+        start=1,
     ):
-        st.session_state["question"] = (
-            "What complaint did Robert Chua make "
-            "about the APEX autocallable note?"
+        st.caption(
+            f"{index}. {example}"
         )
-        st.session_state["example_client"] = "CL002"
-
-with example_col2:
-    if st.button(
-        "Risk acknowledgement",
-        use_container_width=True,
-    ):
-        st.session_state["question"] = (
-            "Was there a signed risk acknowledgement "
-            "for Robert Chua's APEX note?"
-        )
-        st.session_state["example_client"] = "CL002"
-
-with example_col3:
-    if st.button(
-        "Suitability concerns",
-        use_container_width=True,
-    ):
-        st.session_state["question"] = (
-            "What evidence suggests there may be "
-            "a suitability issue for Robert Chua?"
-        )
-        st.session_state["example_client"] = "CL002"
 
 
-# ---------------------------------------------------------
-# Question input
-# ---------------------------------------------------------
-
-default_question = st.session_state.get(
-    "question",
-    "",
-)
+# ============================================================
+# User question
+# ============================================================
 
 question = st.text_area(
-    "Ask a question",
-    value=default_question,
-    height=100,
+    "Ask a wealth-management question",
+    height=120,
     placeholder=(
-        "Example: What complaint did Robert Chua "
-        "make about the APEX autocallable note?"
+        "Example: Does Robert Chua's APEX "
+        "autocallable note raise any suitability concerns?"
     ),
 )
 
 
-# If an example button supplied a client ID, use it unless
-# the user manually entered another one in the sidebar.
-effective_client_id = (
-    client_id.strip()
-    or st.session_state.get(
-        "example_client",
-        "",
-    )
-)
-
-
-# ---------------------------------------------------------
-# Ask button
-# ---------------------------------------------------------
-
-ask = st.button(
-    "Ask Assistant",
+ask_button = st.button(
+    "Ask Advisor",
     type="primary",
     use_container_width=True,
 )
 
 
-# ---------------------------------------------------------
-# Main RAG execution
-# ---------------------------------------------------------
+# ============================================================
+# Run agent
+# ============================================================
 
-if ask:
+if ask_button:
 
     if not question.strip():
 
@@ -165,96 +147,117 @@ if ask:
 
     else:
 
-        where = None
+        # ----------------------------------------------------
+        # Add optional client context
+        # ----------------------------------------------------
 
-        if effective_client_id:
-            where = {
-                "client_id": effective_client_id
-            }
+        agent_question = question.strip()
 
-        # -------------------------------------------------
-        # Retrieval
-        # -------------------------------------------------
+        if client_id.strip():
 
-        with st.status(
-            "Searching documents...",
-            expanded=False,
-        ) as status:
-
-            results = retrieve(
-                question=question,
-                k=top_k,
-                where=where,
+            agent_question += (
+                f"\n\nRelevant client ID: "
+                f"{client_id.strip()}"
             )
 
-            status.update(
-                label=(
-                    f"Retrieved {len(results)} "
-                    f"relevant chunks"
-                ),
-                state="complete",
-            )
-
-        # -------------------------------------------------
-        # Answer generation
-        # -------------------------------------------------
+        # ----------------------------------------------------
+        # Agent response
+        # ----------------------------------------------------
 
         with st.spinner(
-            "Generating grounded answer..."
+            "Analysing client data and documents..."
         ):
 
             try:
 
-                answer = answer_question(
-                    question=question,
-                    client_id=(
-                        effective_client_id
-                        if effective_client_id
-                        else None
-                    ),
-                    k=top_k,
+                answer = run_agent(
+                    agent_question
                 )
 
             except Exception as exc:
 
                 st.error(
-                    f"Unable to generate answer: {exc}"
+                    "The advisor agent encountered an error."
                 )
 
+                st.exception(exc)
                 st.stop()
 
-        # -------------------------------------------------
-        # Answer
-        # -------------------------------------------------
+        # ====================================================
+        # Main answer
+        # ====================================================
 
-        st.divider()
-
-        st.subheader("Answer")
+        st.subheader("Advisor Response")
 
         st.markdown(answer)
 
-        # -------------------------------------------------
-        # Retrieved evidence
-        # -------------------------------------------------
+        # ====================================================
+        # Supporting document retrieval
+        # ====================================================
 
         st.divider()
 
-        st.subheader("Retrieved Evidence")
+        st.subheader(
+            "Retrieved Document Evidence"
+        )
 
-        if not results:
+        st.caption(
+            "These are the highest-ranked document chunks "
+            "returned by semantic retrieval + CrossEncoder "
+            "reranking."
+        )
+
+        try:
+
+            evidence = retrieve(
+                question=question,
+                k=top_k,
+                where=None,
+
+                # Our evaluated default retrieval configuration
+                use_reranker=True,
+                candidate_k=10,
+
+                use_query_rewrite=False,
+                use_query_fusion=False,
+                use_doc_type_routing=False,
+
+                client_id=(
+                    client_id.strip()
+                    if client_id.strip()
+                    else None
+                ),
+            )
+
+        except Exception as exc:
 
             st.warning(
-                "No supporting evidence was retrieved."
+                "The answer was generated, but retrieved "
+                "evidence could not be displayed."
+            )
+
+            st.exception(exc)
+
+            evidence = []
+
+        # ====================================================
+        # Evidence display
+        # ====================================================
+
+        if not evidence:
+
+            st.info(
+                "No document evidence was retrieved."
             )
 
         else:
 
-            for index, result in enumerate(
-                results,
+            for rank, item in enumerate(
+                evidence,
                 start=1,
             ):
 
-                metadata = result.get(
+                metadata = item.get(
                     "metadata",
                     {},
                 )
@@ -269,69 +272,112 @@ if ask:
                     "n/a",
                 )
 
-                doc_type = metadata.get(
-                    "doc_type",
-                    "unknown",
-                )
-
-                retrieved_client = metadata.get(
+                evidence_client = metadata.get(
                     "client_id",
                     "n/a",
                 )
 
-                distance = result.get(
-                    "distance",
-                    0,
+                rerank_score = item.get(
+                    "rerank_score",
                 )
 
                 title = (
-                    f"Evidence {index} — {source}"
+                    f"#{rank} — {source}"
                 )
 
                 if page != "n/a":
-                    title += f" — Page {page}"
+                    title += (
+                        f" — Page {page}"
+                    )
 
-                with st.expander(title):
+                with st.expander(
+                    title,
+                    expanded=(
+                        rank == 1
+                    ),
+                ):
 
-                    col1, col2, col3 = st.columns(3)
+                    col1, col2, col3 = st.columns(
+                        3
+                    )
 
                     with col1:
                         st.metric(
-                            "Similarity distance",
-                            f"{distance:.4f}",
+                            "Rank",
+                            rank,
                         )
 
                     with col2:
                         st.metric(
-                            "Document type",
-                            doc_type,
+                            "Client",
+                            evidence_client,
                         )
 
                     with col3:
-                        st.metric(
-                            "Client",
-                            retrieved_client,
-                        )
+
+                        if rerank_score is not None:
+
+                            st.metric(
+                                "Rerank Score",
+                                f"{rerank_score:.3f}",
+                            )
+
+                        else:
+
+                            st.metric(
+                                "Rerank Score",
+                                "n/a",
+                            )
 
                     st.markdown(
                         "**Retrieved text**"
                     )
 
                     st.write(
-                        result.get(
+                        item.get(
                             "text",
                             "",
                         )
                     )
 
+        # ====================================================
+        # Explainability
+        # ====================================================
 
-# ---------------------------------------------------------
-# Footer
-# ---------------------------------------------------------
+        st.divider()
 
-st.divider()
+        with st.expander(
+            "How this answer was produced"
+        ):
 
-st.caption(
-    "Prototype — responses should be reviewed by a human advisor "
-    "before being used for client decisions."
-)
+            st.markdown(
+                """
+                **1. Agent reasoning**
+                
+                The advisor agent determines which available
+                tools are required for the question.
+
+                **2. Structured data**
+                
+                Exact client, portfolio, and transaction
+                information is retrieved from SQLite when
+                required.
+
+                **3. Document retrieval**
+                
+                Relevant document chunks are retrieved from
+                Chroma using semantic vector similarity.
+
+                **4. Reranking**
+                
+                A CrossEncoder compares the question directly
+                against candidate chunks and reorders them by
+                relevance.
+
+                **5. Grounded generation**
+                
+                The LLM is instructed to answer using only
+                evidence returned by the tools and to avoid
+                inventing unsupported facts.
+                """
+            )

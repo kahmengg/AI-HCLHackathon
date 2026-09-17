@@ -15,11 +15,7 @@ EVAL_SET_PATH = (
 
 
 def load_eval_set() -> list[dict]:
-    with open(
-        EVAL_SET_PATH,
-        "r",
-        encoding="utf-8",
-    ) as file:
+    with open(EVAL_SET_PATH, "r", encoding="utf-8") as file:
         return json.load(file)
 
 
@@ -27,20 +23,10 @@ def evidence_matches(
     retrieved_result: dict,
     expected: dict,
 ) -> bool:
-    metadata = retrieved_result.get(
-        "metadata",
-        {},
-    )
+    metadata = retrieved_result.get("metadata", {})
+    text = retrieved_result.get("text", "").lower()
 
-    text = retrieved_result.get(
-        "text",
-        "",
-    ).lower()
-
-    if (
-        metadata.get("source")
-        != expected.get("source")
-    ):
+    if metadata.get("source") != expected.get("source"):
         return False
 
     optional_fields = [
@@ -52,22 +38,13 @@ def evidence_matches(
     ]
 
     for field in optional_fields:
-
         if field in expected:
-
-            if (
-                metadata.get(field)
-                != expected.get(field)
-            ):
+            if metadata.get(field) != expected.get(field):
                 return False
 
-    required_phrases = expected.get(
-        "must_contain",
-        [],
-    )
+    required_phrases = expected.get("must_contain", [])
 
     for phrase in required_phrases:
-
         if phrase.lower() not in text:
             return False
 
@@ -79,7 +56,6 @@ def calculate_recall(
     expected_evidence: list[dict],
     k: int,
 ) -> float:
-
     if not expected_evidence:
         return 0.0
 
@@ -88,54 +64,38 @@ def calculate_recall(
     matched = 0
 
     for expected in expected_evidence:
-
         found = any(
-            evidence_matches(
-                result,
-                expected,
-            )
+            evidence_matches(result, expected)
             for result in top_k_results
         )
 
         if found:
             matched += 1
 
-    return matched / len(
-        expected_evidence
-    )
+    return matched / len(expected_evidence)
 
 
 def evaluate_query(
     item: dict,
-    use_reranker: bool,
-    use_query_rewrite: bool,
-    use_query_fusion: bool,
+    use_reranker: bool = False,
+    use_query_rewrite: bool = False,
+    use_query_fusion: bool = False,
+    use_doc_type_routing: bool = False,
     max_k: int = 5,
 ) -> dict:
-
     question = item["question"]
-
-    client_id = item.get(
-        "client_id"
-    )
-
-    expected_evidence = item.get(
-        "expected_evidence",
-        [],
-    )
-
-    # Do not hard-filter by client.
-    # Global policy/factsheet evidence may also be required.
-    where = None
+    client_id = item.get("client_id")
+    expected_evidence = item.get("expected_evidence", [])
 
     results = retrieve(
         question=question,
         k=max_k,
-        where=where,
+        where=None,
         use_reranker=use_reranker,
         candidate_k=10,
         use_query_rewrite=use_query_rewrite,
         use_query_fusion=use_query_fusion,
+        use_doc_type_routing=use_doc_type_routing,
         client_id=client_id,
     )
 
@@ -144,19 +104,16 @@ def evaluate_query(
         "question": question,
         "results": results,
         "expected_evidence": expected_evidence,
-
         "recall_at_1": calculate_recall(
             results,
             expected_evidence,
             1,
         ),
-
         "recall_at_3": calculate_recall(
             results,
             expected_evidence,
             3,
         ),
-
         "recall_at_5": calculate_recall(
             results,
             expected_evidence,
@@ -167,14 +124,9 @@ def evaluate_query(
 
 def print_expected_matches(
     result: dict,
-):
-    expected_evidence = result[
-        "expected_evidence"
-    ]
-
-    retrieved_results = result[
-        "results"
-    ]
+) -> None:
+    expected_evidence = result["expected_evidence"]
+    retrieved_results = result["results"]
 
     print()
     print("Expected evidence checks:")
@@ -183,41 +135,26 @@ def print_expected_matches(
         expected_evidence,
         start=1,
     ):
-
         matched_rank = None
 
         for rank, retrieved in enumerate(
             retrieved_results,
             start=1,
         ):
-
-            if evidence_matches(
-                retrieved,
-                expected,
-            ):
+            if evidence_matches(retrieved, expected):
                 matched_rank = rank
                 break
 
-        source = expected.get(
-            "source",
-            "unknown",
-        )
-
-        phrases = expected.get(
-            "must_contain",
-            [],
-        )
+        source = expected.get("source", "unknown")
+        phrases = expected.get("must_contain", [])
 
         if matched_rank is not None:
-
             print(
                 f"  Expected {index}: "
                 f"HIT at rank {matched_rank} "
                 f"| source={source}"
             )
-
         else:
-
             print(
                 f"  Expected {index}: "
                 f"MISS "
@@ -225,88 +162,52 @@ def print_expected_matches(
             )
 
         if phrases:
-
             print(
-                f"      must_contain="
-                f"{phrases}"
+                f"      must_contain={phrases}"
             )
 
 
 def evaluate_mode(
     eval_set: list[dict],
     mode_name: str,
-    use_reranker: bool,
-    use_query_rewrite: bool,
-    use_query_fusion: bool,
+    use_reranker: bool = False,
+    use_query_rewrite: bool = False,
+    use_query_fusion: bool = False,
+    use_doc_type_routing: bool = False,
 ) -> list[dict]:
-
     evaluated = []
 
     print()
-    print("=" * 90)
+    print("=" * 100)
     print(mode_name)
-    print("=" * 90)
+    print("=" * 100)
 
     for item in eval_set:
-
         result = evaluate_query(
             item=item,
             use_reranker=use_reranker,
             use_query_rewrite=use_query_rewrite,
             use_query_fusion=use_query_fusion,
+            use_doc_type_routing=use_doc_type_routing,
             max_k=5,
         )
 
-        evaluated.append(
-            result
-        )
+        evaluated.append(result)
 
         print()
-        print("-" * 90)
+        print("-" * 100)
+
+        print(f"ID: {result['id']}")
+        print(f"Question: {result['question']}")
 
         print(
-            f"ID: {result['id']}"
+            f"Recall@1: {result['recall_at_1']:.2f}"
         )
-
         print(
-            f"Question: "
-            f"{result['question']}"
+            f"Recall@3: {result['recall_at_3']:.2f}"
         )
-
-        if (
-            (
-                use_query_rewrite
-                or use_query_fusion
-            )
-            and result["results"]
-        ):
-
-            rewritten_query = (
-                result["results"][0]
-                .get(
-                    "search_query",
-                    result["question"],
-                )
-            )
-
-            print(
-                f"Rewritten query: "
-                f"{rewritten_query}"
-            )
-
         print(
-            f"Recall@1: "
-            f"{result['recall_at_1']:.2f}"
-        )
-
-        print(
-            f"Recall@3: "
-            f"{result['recall_at_3']:.2f}"
-        )
-
-        print(
-            f"Recall@5: "
-            f"{result['recall_at_5']:.2f}"
+            f"Recall@5: {result['recall_at_5']:.2f}"
         )
 
         print()
@@ -316,32 +217,23 @@ def evaluate_mode(
             result["results"],
             start=1,
         ):
-
-            metadata = retrieved.get(
-                "metadata",
-                {},
-            )
+            metadata = retrieved.get("metadata", {})
 
             line = (
                 f"{index}. "
                 f"{metadata.get('source', 'unknown')} "
-                f"| page="
-                f"{metadata.get('page', 'n/a')} "
-                f"| client="
-                f"{metadata.get('client_id', 'n/a')} "
-                f"| distance="
-                f"{retrieved.get('distance', 0):.4f}"
+                f"| page={metadata.get('page', 'n/a')} "
+                f"| client={metadata.get('client_id', 'n/a')} "
+                f"| distance={retrieved.get('distance', 0):.4f}"
             )
 
             if "rerank_score" in retrieved:
-
                 line += (
                     f" | rerank_score="
                     f"{retrieved['rerank_score']:.4f}"
                 )
 
             if "retrieval_mode" in retrieved:
-
                 line += (
                     f" | mode="
                     f"{retrieved['retrieval_mode']}"
@@ -349,9 +241,7 @@ def evaluate_mode(
 
             print(line)
 
-        print_expected_matches(
-            result
-        )
+        print_expected_matches(result)
 
     return evaluated
 
@@ -360,7 +250,6 @@ def average_metric(
     evaluated: list[dict],
     key: str,
 ) -> float:
-
     if not evaluated:
         return 0.0
 
@@ -373,7 +262,6 @@ def average_metric(
 def get_summary(
     evaluated: list[dict],
 ) -> dict:
-
     return {
         "recall_at_1": average_metric(
             evaluated,
@@ -391,103 +279,52 @@ def get_summary(
 
 
 def run_evaluation():
-
     eval_set = load_eval_set()
 
     if not eval_set:
-        print(
-            "No evaluation questions found."
-        )
+        print("No evaluation questions found.")
         return
-
-    # =====================================================
-    # 1. Baseline
-    # =====================================================
 
     baseline = evaluate_mode(
         eval_set=eval_set,
         mode_name="BASELINE RETRIEVAL",
-        use_reranker=False,
-        use_query_rewrite=False,
-        use_query_fusion=False,
     )
-
-    # =====================================================
-    # 2. Reranker only
-    # =====================================================
 
     reranked = evaluate_mode(
         eval_set=eval_set,
         mode_name="RERANKED RETRIEVAL",
         use_reranker=True,
-        use_query_rewrite=False,
-        use_query_fusion=False,
     )
-
-    # =====================================================
-    # 3. Rewrite + rerank
-    # =====================================================
 
     rewritten_reranked = evaluate_mode(
         eval_set=eval_set,
-        mode_name=(
-            "QUERY REWRITE + "
-            "RERANKED RETRIEVAL"
-        ),
+        mode_name="QUERY REWRITE + RERANKED RETRIEVAL",
         use_reranker=True,
         use_query_rewrite=True,
-        use_query_fusion=False,
     )
-
-    # =====================================================
-    # 4. Fusion + rerank
-    # =====================================================
 
     fusion_reranked = evaluate_mode(
         eval_set=eval_set,
-        mode_name=(
-            "QUERY FUSION + "
-            "RERANKED RETRIEVAL"
-        ),
-
-        # Fusion itself already reranks internally.
-        use_reranker=False,
-
-        # Do not replace the original query.
-        use_query_rewrite=False,
-
-        # Search both original + rewritten.
+        mode_name="QUERY FUSION + RERANKED RETRIEVAL",
         use_query_fusion=True,
     )
 
-    # =====================================================
-    # Summaries
-    # =====================================================
-
-    baseline_summary = get_summary(
-        baseline
+    routed_reranked = evaluate_mode(
+        eval_set=eval_set,
+        mode_name="DOC-TYPE ROUTING + RERANKED RETRIEVAL",
+        use_doc_type_routing=True,
     )
 
-    reranked_summary = get_summary(
-        reranked
-    )
-
-    rewritten_summary = get_summary(
-        rewritten_reranked
-    )
-
-    fusion_summary = get_summary(
-        fusion_reranked
-    )
-
-    # =====================================================
-    # Final comparison
-    # =====================================================
+    baseline_summary = get_summary(baseline)
+    reranked_summary = get_summary(reranked)
+    rewritten_summary = get_summary(rewritten_reranked)
+    fusion_summary = get_summary(fusion_reranked)
+    routed_summary = get_summary(routed_reranked)
 
     print()
-    print("=" * 110)
+    print("=" * 125)
     print("FINAL RETRIEVAL COMPARISON")
-    print("=" * 110)
+    print("=" * 125)
 
     print(
         f"{'Metric':<15}"
@@ -495,79 +332,25 @@ def run_evaluation():
         f"{'Reranked':<18}"
         f"{'Rewrite+Rerank':<20}"
         f"{'Fusion+Rerank':<20}"
+        f"{'Routing+Rerank':<20}"
     )
 
-    print(
-        "-" * 91
-    )
+    print("-" * 111)
 
     metrics = [
-        (
-            "Recall@1",
-            "recall_at_1",
-        ),
-        (
-            "Recall@3",
-            "recall_at_3",
-        ),
-        (
-            "Recall@5",
-            "recall_at_5",
-        ),
+        ("Recall@1", "recall_at_1"),
+        ("Recall@3", "recall_at_3"),
+        ("Recall@5", "recall_at_5"),
     ]
 
     for label, key in metrics:
-
         print(
             f"{label:<15}"
             f"{baseline_summary[key]:<18.2%}"
             f"{reranked_summary[key]:<18.2%}"
             f"{rewritten_summary[key]:<20.2%}"
             f"{fusion_summary[key]:<20.2%}"
-        )
-
-    # =====================================================
-    # Improvement vs baseline
-    # =====================================================
-
-    print()
-    print("=" * 110)
-    print("IMPROVEMENT VS BASELINE")
-    print("=" * 110)
-
-    print(
-        f"{'Metric':<15}"
-        f"{'Reranking':<18}"
-        f"{'Rewrite+Rerank':<20}"
-        f"{'Fusion+Rerank':<20}"
-    )
-
-    print(
-        "-" * 73
-    )
-
-    for label, key in metrics:
-
-        rerank_change = (
-            reranked_summary[key]
-            - baseline_summary[key]
-        )
-
-        rewrite_change = (
-            rewritten_summary[key]
-            - baseline_summary[key]
-        )
-
-        fusion_change = (
-            fusion_summary[key]
-            - baseline_summary[key]
-        )
-
-        print(
-            f"{label:<15}"
-            f"{rerank_change:<+18.2%}"
-            f"{rewrite_change:<+20.2%}"
-            f"{fusion_change:<+20.2%}"
+            f"{routed_summary[key]:<20.2%}"
         )
 
 
