@@ -1,72 +1,394 @@
-"""
-Loads the structured tabular files (clients_portfolio.csv, transactions.csv)
-into pandas DataFrames and exposes query functions.
-
-WHY THIS DATA NEVER GOES THROUGH THE CHUNK/EMBED PIPELINE:
-Turning "client CL011 holds SGD 480,000 of Fund X, 22% of portfolio" into a
-prose chunk and relying on semantic similarity to retrieve it loses exact
-filtering and arithmetic (e.g. "clients over the 20% concentration
-guideline"). Keeping it as a DataFrame lets the LLM call a tool that filters/
-sums exactly, then reasons over the (small, exact) result - instead of hoping
-embedding similarity surfaces the right rows.
-
-NOTE ON COLUMN NAMES: the exact column names below are a best guess from the
-README ("15 client profiles... risk profile, and full portfolio holdings",
-"transactions.csv... 55-row transaction ledger"). Run `inspect_columns()`
-once against your real files and adjust CLIENT_ID_COL / VALUE_COL etc. below
-if they differ - everything downstream (tools.py, eval) reads through these
-constants, so it's a one-place fix.
-"""
-from pathlib import Path
 import pandas as pd
 
-# --- adjust these if the real column names differ ---
-CLIENT_ID_COL = "client_id"
-HOLDING_VALUE_COL = "market_value"
-TXN_DATE_COL = "date"
-# -----------------------------------------------------
-
-_portfolio_df: pd.DataFrame | None = None
-_transactions_df: pd.DataFrame | None = None
+from src.structured.database import get_connection
 
 
-def inspect_columns(data_dir: Path) -> None:
-    """Quick sanity check - run this first against the real files and confirm
-    CLIENT_ID_COL / HOLDING_VALUE_COL / TXN_DATE_COL above actually exist."""
-    portfolio = pd.read_csv(data_dir / "clients_portfolio.csv")
-    transactions = pd.read_csv(data_dir / "transactions.csv")
-    print("clients_portfolio.csv columns:", list(portfolio.columns))
-    print("transactions.csv columns:", list(transactions.columns))
+# ==========================================================
+# CLIENT
+# ==========================================================
+
+def get_client_profile(
+    client_id: str
+) -> dict | None:
+
+    client_id = client_id.upper().strip()
+
+    with get_connection() as conn:
+
+        row = conn.execute(
+            """
+            SELECT *
+            FROM clients
+            WHERE client_id = ?
+            """,
+            (client_id,)
+        ).fetchone()
+
+    if row is None:
+        return None
+
+    return dict(row)
 
 
-def load_structured_data(data_dir: Path):
-    global _portfolio_df, _transactions_df
-    _portfolio_df = pd.read_csv(data_dir / "clients_portfolio.csv")
-    _transactions_df = pd.read_csv(data_dir / "transactions.csv")
-    return _portfolio_df, _transactions_df
+# ==========================================================
+# PORTFOLIO
+# ==========================================================
+
+def get_portfolio(
+    client_id: str
+) -> pd.DataFrame:
+
+    client_id = client_id.upper().strip()
+
+    with get_connection() as conn:
+
+        query = """
+        SELECT
+            holding_id,
+            client_id,
+            product_name,
+            asset_class,
+            allocation_pct,
+            value_sgd,
+            currency
+        FROM holdings
+        WHERE client_id = ?
+        ORDER BY allocation_pct DESC
+        """
+
+        return pd.read_sql_query(
+            query,
+            conn,
+            params=(client_id,)
+        )
 
 
-def get_portfolio(client_id: str) -> pd.DataFrame:
-    """All holdings rows for one client."""
-    return _portfolio_df[_portfolio_df[CLIENT_ID_COL] == client_id]
+# ==========================================================
+# TRANSACTIONS
+# ==========================================================
 
+def get_transactions(
+    client_id: str,
+    start_date: str | None = None,
+    end_date: str | None = None,
+) -> pd.DataFrame:
 
-def get_transactions(client_id: str, start_date: str | None = None,
-                      end_date: str | None = None) -> pd.DataFrame:
-    df = _transactions_df[_transactions_df[CLIENT_ID_COL] == client_id]
+    client_id = client_id.upper().strip()
+
+    query = """
+    SELECT *
+    FROM transactions
+    WHERE client_id = ?
+    """
+
+    params = [client_id]
+
     if start_date:
-        df = df[df[TXN_DATE_COL] >= start_date]
+
+        query += """
+        AND date >= ?
+        """
+
+        params.append(start_date)
+
     if end_date:
-        df = df[df[TXN_DATE_COL] <= end_date]
-    return df
+
+        query += """
+        AND date <= ?
+        """
+
+        params.append(end_date)
+
+    query += """
+    ORDER BY date DESC
+    """
+
+    with get_connection() as conn:
+
+        return pd.read_sql_query(
+            query,
+            conn,
+            params=params
+        )
 
 
-def get_concentration_breaches(threshold_pct: float = 20.0) -> pd.DataFrame:
-    """Clients whose single holding exceeds threshold_pct of their total
-    portfolio value - directly answers the README's concentration-guideline
-    example question."""
-    df = _portfolio_df.copy()
-    df["pct_of_portfolio"] = df.groupby(CLIENT_ID_COL)[HOLDING_VALUE_COL].transform(
-        lambda x: x / x.sum() * 100
-    )
-    return df[df["pct_of_portfolio"] > threshold_pct]
+# ==========================================================
+# CONCENTRATION
+# ==========================================================
+
+def get_concentration_breaches(
+    threshold_pct: float = 20.0,
+    include_equal: bool = False,
+) -> pd.DataFrame:
+
+    operator = ">=" if include_equal else ">"
+
+    query = f"""
+    SELECT
+        c.client_id,
+        c.name,
+        c.risk_profile,
+        c.risk_score_1_to_10,
+
+        h.product_name,
+        h.asset_class,
+        h.allocation_pct,
+        h.value_sgd
+
+    FROM clients c
+
+    JOIN holdings h
+        ON c.client_id = h.client_id
+
+    WHERE h.allocation_pct {operator} ?
+
+    ORDER BY h.allocation_pct DESC
+    """
+
+    with get_connection() as conn:
+
+        return pd.read_sql_query(
+            query,
+            conn,
+            params=(threshold_pct,)
+        )
+
+
+# ==========================================================
+# RISK PROFILE
+# ==========================================================
+
+def get_clients_by_risk_profile(
+    risk_profile: str
+) -> pd.DataFrame:
+
+    query = """
+    SELECT
+        client_id,
+        name,
+        age,
+        risk_profile,
+        risk_score_1_to_10,
+        aum_sgd,
+        investor_status,
+        relationship_manager
+
+    FROM clients
+
+    WHERE LOWER(risk_profile) = LOWER(?)
+
+    ORDER BY risk_score_1_to_10 DESC
+    """
+
+    with get_connection() as conn:
+
+        return pd.read_sql_query(
+            query,
+            conn,
+            params=(risk_profile,)
+        )
+
+
+# ==========================================================
+# RISK SCORE
+# ==========================================================
+
+def get_clients_by_risk_score(
+    minimum_score: int | None = None,
+    maximum_score: int | None = None,
+) -> pd.DataFrame:
+
+    query = """
+    SELECT
+        client_id,
+        name,
+        risk_profile,
+        risk_score_1_to_10,
+        aum_sgd,
+        investor_status
+
+    FROM clients
+
+    WHERE 1 = 1
+    """
+
+    params = []
+
+    if minimum_score is not None:
+
+        query += """
+        AND risk_score_1_to_10 >= ?
+        """
+
+        params.append(minimum_score)
+
+    if maximum_score is not None:
+
+        query += """
+        AND risk_score_1_to_10 <= ?
+        """
+
+        params.append(maximum_score)
+
+    query += """
+    ORDER BY risk_score_1_to_10 DESC
+    """
+
+    with get_connection() as conn:
+
+        return pd.read_sql_query(
+            query,
+            conn,
+            params=params
+        )
+
+
+# ==========================================================
+# SUITABILITY
+# ==========================================================
+
+def get_potential_suitability_mismatches() -> pd.DataFrame:
+
+    query = """
+    SELECT
+        client_id,
+        name,
+        risk_profile,
+        risk_score_1_to_10,
+        aum_sgd,
+        suitability_flag,
+        relationship_manager
+
+    FROM clients
+
+    WHERE suitability_flag LIKE 'POTENTIAL MISMATCH%'
+
+    ORDER BY client_id
+    """
+
+    with get_connection() as conn:
+
+        return pd.read_sql_query(
+            query,
+            conn
+        )
+
+
+# ==========================================================
+# PRODUCT SEARCH
+# ==========================================================
+
+def get_clients_holding_product(
+    product_name: str
+) -> pd.DataFrame:
+
+    query = """
+    SELECT
+        c.client_id,
+        c.name,
+        c.risk_profile,
+
+        h.product_name,
+        h.asset_class,
+        h.allocation_pct,
+        h.value_sgd,
+
+        c.suitability_flag
+
+    FROM clients c
+
+    JOIN holdings h
+        ON c.client_id = h.client_id
+
+    WHERE LOWER(h.product_name)
+        LIKE LOWER(?)
+
+    ORDER BY h.allocation_pct DESC
+    """
+
+    search = f"%{product_name}%"
+
+    with get_connection() as conn:
+
+        return pd.read_sql_query(
+            query,
+            conn,
+            params=(search,)
+        )
+
+
+# ==========================================================
+# ASSET CLASS SEARCH
+# ==========================================================
+
+def get_clients_holding_asset_class(
+    asset_class: str
+) -> pd.DataFrame:
+
+    query = """
+    SELECT
+        c.client_id,
+        c.name,
+        c.risk_profile,
+
+        h.product_name,
+        h.asset_class,
+        h.allocation_pct,
+        h.value_sgd
+
+    FROM clients c
+
+    JOIN holdings h
+        ON c.client_id = h.client_id
+
+    WHERE LOWER(h.asset_class)
+        LIKE LOWER(?)
+
+    ORDER BY h.allocation_pct DESC
+    """
+
+    search = f"%{asset_class}%"
+
+    with get_connection() as conn:
+
+        return pd.read_sql_query(
+            query,
+            conn,
+            params=(search,)
+        )
+
+
+# ==========================================================
+# DATASET SUMMARY
+# ==========================================================
+
+def get_dataset_summary() -> dict:
+
+    with get_connection() as conn:
+
+        client_count = conn.execute(
+            """
+            SELECT COUNT(*)
+            FROM clients
+            """
+        ).fetchone()[0]
+
+        holding_count = conn.execute(
+            """
+            SELECT COUNT(*)
+            FROM holdings
+            """
+        ).fetchone()[0]
+
+        transaction_count = conn.execute(
+            """
+            SELECT COUNT(*)
+            FROM transactions
+            """
+        ).fetchone()[0]
+
+    return {
+        "clients": client_count,
+        "holdings": holding_count,
+        "transactions": transaction_count,
+    }
