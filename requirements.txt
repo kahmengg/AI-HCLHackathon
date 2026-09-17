@@ -1,0 +1,7 @@
+pypdf==5.1.0
+chromadb==0.5.20
+pandas==2.2.3
+openpyxl==3.1.5
+sentence-transformers==3.3.1
+anthropic==0.40.0
+openai==1.57.0
