@@ -1,0 +1,131 @@
+[
+  {
+    "id": "eval_001",
+    "question": "What is the Summary Risk Indicator (SRI) rating of the APAC Stable Income Money Market Fund, and what is the minimum initial investment for a retail investor?",
+    "expected_evidence": [
+      {
+        "source": "fund_factsheet_safe.pdf",
+        "must_contain": [
+          "SUMMARY RISK INDICATOR",
+          "1 / 7"
+        ]
+      },
+      {
+        "source": "fund_factsheet_safe.pdf",
+        "must_contain": [
+          "Minimum Initial Investment",
+          "SGD 10,000"
+        ]
+      }
+    ]
+  },
+
+  {
+    "id": "eval_002",
+    "question": "Is Robert Chua's (CL002) holding of the APEX Global Multi-Asset Autocallable Note Series 7 suitable given his risk profile? What documentation is missing?",
+    "client_id": "CL002",
+    "expected_evidence": [
+      {
+        "source": "policy_investment_suitability.pdf",
+        "must_contain": [
+          "Risk Score of 7 or above"
+        ]
+      },
+      {
+        "source": "rm_call_notes_log.pdf",
+        "must_contain": [
+          "did not fully understand"
+        ]
+      },
+      {
+        "source": "client_correspondence.json",
+        "must_contain": [
+          "cannot locate a signed product-specific risk acknowledgement"
+        ]
+      },
+      {
+        "source": "client_complaint_letters.pdf",
+        "must_contain": [
+          "APEX Global Multi-Asset Autocallable Note"
+        ]
+      }
+    ]
+  },
+
+  {
+    "id": "eval_003",
+    "question": "How much LRS remittance headroom does Arjun Mehta (CL015) have left for the current financial year as of his July 2026 discussion with his RM, and can his planned USD 60,000 top-up proceed as-is?",
+    "client_id": "CL015",
+    "expected_evidence": [
+      {
+        "source": "client_correspondence.json",
+        "must_contain": [
+          "USD 210,000",
+          "USD 40,000"
+        ]
+      },
+      {
+        "source": "client_correspondence.json",
+        "must_contain": [
+          "USD 60,000",
+          "USD 20,000"
+        ]
+      },
+      {
+        "source": "rm_call_notes_log.pdf",
+        "must_contain": [
+          "USD 40,000",
+          "headroom"
+        ]
+      }
+    ]
+  },
+
+  {
+    "id": "eval_004",
+    "question": "Does Park Ji-hoon's (CL011) 35% portfolio allocation to the APEX Autocallable Note breach firm policy?",
+    "client_id": "CL011",
+    "expected_evidence": [
+      {
+        "source": "policy_investment_suitability.pdf",
+        "must_contain": [
+          "20%",
+          "Retail Investor"
+        ]
+      },
+      {
+        "source": "rm_call_notes_log.pdf",
+        "must_contain": [
+          "no exception documented"
+        ]
+      }
+    ]
+  },
+
+  {
+    "id": "eval_005",
+    "question": "Walk me through what has happened with James Sullivan's (CL013) request to de-risk his portfolio ahead of retirement. Has any rebalancing actually occurred yet?",
+    "client_id": "CL013",
+    "expected_evidence": [
+      {
+        "source": "client_correspondence.json",
+        "must_contain": [
+          "retiring in about 6 months",
+          "de-risk"
+        ]
+      },
+      {
+        "source": "rm_call_notes_log.pdf",
+        "must_contain": [
+          "phased rebalancing"
+        ]
+      },
+      {
+        "source": "client_complaint_letters.pdf",
+        "must_contain": [
+          "no rebalancing trades"
+        ]
+      }
+    ]
+  }
+]
