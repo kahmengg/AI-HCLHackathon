@@ -1,0 +1,162 @@
+{
+  "dataset_note": "Fictitious email correspondence prepared for a Wealth Management AI Assistant RAG system. No real persons or institutions are represented.",
+  "email_threads": [
+    {
+      "thread_id": "EML-001",
+      "subject": "CRS Tax Residency Self-Certification - Follow Up",
+      "related_client_id": "CL006",
+      "messages": [
+        {
+          "from": "cheryl.ng@meridianpeakwealth.example",
+          "to": "ahmad.rahman@example.com",
+          "date": "2026-02-12",
+          "body": "Dear Mr Rahman,\n\nFollowing your update that your primary residence is now confirmed in Kuala Lumpur, we are required under the Common Reporting Standard (CRS) to refresh your tax residency self-certification for your Singapore booking centre account.\n\nCould we schedule a short call this week to complete this together? It should take no more than 10 minutes.\n\nBest regards,\nCheryl Ng\nRelationship Manager, Meridian Peak Wealth Partners"
+        },
+        {
+          "from": "ahmad.rahman@example.com",
+          "to": "cheryl.ng@meridianpeakwealth.example",
+          "date": "2026-02-13",
+          "body": "Hi Cheryl,\n\nSure, Friday afternoon works for me. To confirm, I am tax resident in Malaysia only - no US person status, no other tax residencies.\n\nThanks,\nAhmad"
+        },
+        {
+          "from": "cheryl.ng@meridianpeakwealth.example",
+          "to": "ahmad.rahman@example.com",
+          "date": "2026-02-14",
+          "body": "Hi Ahmad,\n\nThank you for the call earlier today. I've filed the updated CRS self-certification confirming Malaysia as your sole tax residency. No further action needed on your end.\n\nBest regards,\nCheryl"
+        }
+      ]
+    },
+    {
+      "thread_id": "EML-002",
+      "subject": "Request to increase Private Equity Fund IV allocation",
+      "related_client_id": "CL009",
+      "messages": [
+        {
+          "from": "le.thi.mai@example.com",
+          "to": "cheryl.ng@meridianpeakwealth.example",
+          "date": "2026-07-22",
+          "body": "Hi Cheryl,\n\nNow that the transfer has settled, I'd like to explore increasing my Private Equity Fund IV commitment beyond the initial allocation we discussed. I understand this is a long lock-up but I'm comfortable with that given my horizon.\n\nCan you send me the updated capital call schedule and minimum increment for a top-up?\n\nBest,\nMai"
+        },
+        {
+          "from": "cheryl.ng@meridianpeakwealth.example",
+          "to": "le.thi.mai@example.com",
+          "date": "2026-07-23",
+          "body": "Hi Mai,\n\nHappy to help. A few things to confirm before we proceed:\n\n1. Any top-up will be treated as an additional commitment subject to the same 5-year capital call schedule from the date of the top-up (not backdated to the original commitment).\n2. Minimum top-up increment is USD 100,000.\n3. Since this increases your exposure to a Complex/Restricted Product, I'll need to re-run a brief suitability check given your existing 25% allocation - want to make sure we stay within a sensible concentration level even though you're an Accredited Investor.\n\nI'll send the capital call schedule separately. Let's discuss the suitability check on our next call.\n\nBest,\nCheryl"
+        }
+      ]
+    },
+    {
+      "thread_id": "EML-003",
+      "subject": "Online banking access issue",
+      "related_client_id": "CL010",
+      "messages": [
+        {
+          "from": "kenji.watanabe@example.com",
+          "to": "daniel.koh@meridianpeakwealth.example",
+          "date": "2026-05-25",
+          "body": "Dear Daniel,\n\nI have not been able to log in to the online portal since I updated my mobile number last week. It says my one-time password is not being received.\n\nCould you help me resolve this before our review on 30 May?\n\nRegards,\nKenji Watanabe"
+        },
+        {
+          "from": "daniel.koh@meridianpeakwealth.example",
+          "to": "kenji.watanabe@example.com",
+          "date": "2026-05-26",
+          "body": "Dear Mr Watanabe,\n\nThank you for flagging this. I've escalated to our Digital Banking support team - your mobile number on file has now been re-verified and OTP delivery should work as normal. Please try logging in again and let me know if the issue persists.\n\nSee you at our review on the 30th.\n\nBest regards,\nDaniel"
+        },
+        {
+          "from": "kenji.watanabe@example.com",
+          "to": "daniel.koh@meridianpeakwealth.example",
+          "date": "2026-05-27",
+          "body": "Hi Daniel,\n\nThat worked, thank you. See you on the 30th.\n\nKenji"
+        }
+      ]
+    },
+    {
+      "thread_id": "EML-004",
+      "subject": "LRS remittance headroom for planned top-up",
+      "related_client_id": "CL015",
+      "messages": [
+        {
+          "from": "arjun.mehta@example.com",
+          "to": "daniel.koh@meridianpeakwealth.example",
+          "date": "2026-07-24",
+          "body": "Hi Daniel,\n\nI'm planning to remit another USD 60,000 from India for investment top-up next month. Can you check with me on a call whether this fits within my LRS headroom for this financial year? I remitted roughly USD 210,000 earlier this year already, if I recall correctly.\n\nThanks,\nArjun"
+        },
+        {
+          "from": "daniel.koh@meridianpeakwealth.example",
+          "to": "arjun.mehta@example.com",
+          "date": "2026-07-24",
+          "body": "Hi Arjun,\n\nGood catch flagging this proactively. Based on our records, your remittances this financial year total approximately USD 210,000, leaving roughly USD 40,000 of headroom under the USD 250,000 LRS limit. Your planned USD 60,000 remittance would exceed that by about USD 20,000.\n\nLet's get on a call this week to review the exact figures with your tax advisor's confirmation before you initiate anything, since LRS compliance is on your side (India) rather than something we can verify independently from Singapore.\n\nBest,\nDaniel"
+        },
+        {
+          "from": "arjun.mehta@example.com",
+          "to": "daniel.koh@meridianpeakwealth.example",
+          "date": "2026-07-25",
+          "body": "Thanks Daniel, appreciate the sanity check. Let's discuss on today's call and I'll confirm the exact number with my CA before doing anything."
+        }
+      ]
+    },
+    {
+      "thread_id": "EML-005",
+      "subject": "James Sullivan - retirement, please de-risk portfolio",
+      "related_client_id": "CL013",
+      "messages": [
+        {
+          "from": "james.sullivan@example.com",
+          "to": "daniel.koh@meridianpeakwealth.example",
+          "date": "2026-08-07",
+          "body": "Hi Daniel,\n\nWanted to give you a heads up - I've given notice at work and will be retiring in about 6 months. Given that, I want to de-risk my portfolio before I finish up. I know we've been fairly growth-focused for a while but that's not right for me anymore.\n\nCan we set up a call to go through this?\n\nThanks,\nJames"
+        },
+        {
+          "from": "daniel.koh@meridianpeakwealth.example",
+          "to": "james.sullivan@example.com",
+          "date": "2026-08-08",
+          "body": "Hi James,\n\nCongratulations on the upcoming retirement, and thanks for flagging this early. Let's speak this week - I'll put together some options for how we phase the de-risking so we're not forced into selling everything at once at a bad time.\n\nDoes Tuesday 11 August at 3pm work for a call?\n\nBest,\nDaniel"
+        },
+        {
+          "from": "james.sullivan@example.com",
+          "to": "daniel.koh@meridianpeakwealth.example",
+          "date": "2026-08-08",
+          "body": "Tuesday 3pm works. Speak then."
+        }
+      ]
+    },
+    {
+      "thread_id": "EML-006",
+      "subject": "[Internal] Suitability query - CL002 structured note complaint",
+      "related_client_id": "CL002",
+      "messages": [
+        {
+          "from": "compliance.team@meridianpeakwealth.example",
+          "to": "grace.lim@meridianpeakwealth.example",
+          "date": "2026-02-06",
+          "body": "Hi Grace,\n\nWe've received a formal complaint from Robert Chua (CL002, ref CPL-2026-014) regarding the APEX Autocallable Note position. Can you pull together:\n\n1. The original trade file and any risk acknowledgement signed at time of purchase.\n2. Your call note from the 20 Jan 2026 review where comprehension issues were raised.\n3. His current Risk Profile Questionnaire (RPQ) and CRR history.\n\nWe need this by end of week to assess against POL-INV-011 Sections 4 and 6.\n\nThanks,\nCompliance Team"
+        },
+        {
+          "from": "grace.lim@meridianpeakwealth.example",
+          "to": "compliance.team@meridianpeakwealth.example",
+          "date": "2026-02-07",
+          "body": "Hi team,\n\nSending over what I have. Flagging upfront: I cannot locate a signed product-specific risk acknowledgement for the APEX Note on this account, only the general onboarding risk disclosure signed in 2023. His RPQ has consistently scored him Conservative (Risk Score 2) since onboarding, most recently refreshed 2025-11-05.\n\nLet me know what else you need.\n\nGrace"
+        }
+      ]
+    },
+    {
+      "thread_id": "EML-007",
+      "subject": "[Internal] CAR/CKA gap - CL008 Dual Currency Investment",
+      "related_client_id": "CL008",
+      "messages": [
+        {
+          "from": "compliance.team@meridianpeakwealth.example",
+          "to": "grace.lim@meridianpeakwealth.example",
+          "date": "2026-04-02",
+          "body": "Hi Grace,\n\nDuring routine post-trade surveillance we noticed the DCI (AUD/USD) trade booked for Carlos Bautista (CL008) on 2026-03-15 does not have a completed Customer Account Review / Customer Knowledge Assessment (CAR/CKA) on file, which is required before a first sale of any Specified Investment Product to a Retail Investor per POL-INV-011 Section 4.\n\nCan you advise how this trade was approved, and please arrange for the CKA to be completed retrospectively together with a written risk acknowledgement before any further SIP trades on this account.\n\nThanks,\nCompliance Team"
+        },
+        {
+          "from": "grace.lim@meridianpeakwealth.example",
+          "to": "compliance.team@meridianpeakwealth.example",
+          "date": "2026-04-03",
+          "body": "Hi team,\n\nApologies - this was introduced as a relationship idea during a call and I proceeded with the trade without realising the CKA step applied to DCIs, not just structured notes. Will arrange the retrospective CKA with Mr Bautista this week and file the risk acknowledgement. Noted for future SIP sales.\n\nGrace"
+        }
+      ]
+    }
+  ]
+}

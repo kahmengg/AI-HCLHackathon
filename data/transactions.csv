@@ -1,0 +1,56 @@
+transaction_id,client_id,date,transaction_type,product_name,amount,currency,status,notes
+TXN-1001,CL001,2026-02-10,Subscription,APEX Global Multi-Asset Autocallable Note Series 7,1050000,USD,Settled,"Signed risk acknowledgement on file, same date."
+TXN-1002,CL001,2026-03-01,Subscription,Global Technology Innovation Fund,840000,USD,Settled,
+TXN-1003,CL001,2026-04-15,Coupon Payment,APEX Global Multi-Asset Autocallable Note Series 7,30188,USD,Settled,Quarterly contingent coupon paid - barrier condition met.
+TXN-1004,CL001,2026-05-20,Subscription,Private Equity Co-Investment Vehicle - Fund IV,420000,USD,Settled,Initial capital call funded.
+TXN-1005,CL001,2026-07-15,Coupon Payment,APEX Global Multi-Asset Autocallable Note Series 7,30188,USD,Settled,
+TXN-1006,CL002,2024-11-12,Subscription,APEX Global Multi-Asset Autocallable Note Series 7,127500,USD,Settled,No signed product-specific risk acknowledgement located on file.
+TXN-1007,CL002,2025-02-15,Coupon Payment,APEX Global Multi-Asset Autocallable Note Series 7,3665,USD,Settled,
+TXN-1008,CL002,2025-05-15,Coupon Payment,APEX Global Multi-Asset Autocallable Note Series 7,3665,USD,Settled,
+TXN-1009,CL002,2025-08-15,Coupon Payment,APEX Global Multi-Asset Autocallable Note Series 7,0,USD,Settled,Coupon Barrier condition not met - no coupon paid this period.
+TXN-1010,CL002,2025-11-17,Coupon Payment,APEX Global Multi-Asset Autocallable Note Series 7,3665,USD,Settled,
+TXN-1011,CL002,2026-01-05,Redemption,APAC Stable Income Money Market Fund,50000,SGD,Settled,Partial redemption for living expenses.
+TXN-1012,CL003,2026-01-20,Subscription,Balanced Income & Growth Fund,840000,USD,Settled,
+TXN-1013,CL003,2026-03-05,Subscription,Global Bond Income Fund,525000,USD,Settled,
+TXN-1014,CL003,2026-05-12,Switch,Pacific Growth Equity Fund,525000,USD,Settled,Switched from cash into regional equity fund per review.
+TXN-1015,CL004,2026-02-01,Subscription,Private Equity Co-Investment Vehicle - Fund IV,3700000,USD,Settled,Capital call 1 of 5 for family office co-investment.
+TXN-1016,CL004,2026-04-20,Subscription,APEX Global Multi-Asset Autocallable Note Series 7,2775000,USD,Settled,Investment Policy Statement exception documented.
+TXN-1017,CL004,2026-06-30,Coupon Payment,APEX Global Multi-Asset Autocallable Note Series 7,79781,USD,Settled,
+TXN-1018,CL005,2026-01-10,Subscription,Pacific Growth Equity Fund,990000,USD,Settled,
+TXN-1019,CL005,2026-02-20,Subscription,Global Technology Innovation Fund,660000,USD,Settled,
+TXN-1020,CL005,2026-04-22,Subscription,Global Bond Income Fund,495000,USD,Settled,Cross-border transfer - source of funds re-verified.
+TXN-1021,CL006,2026-01-05,Subscription,Pacific Growth Equity Fund,870000,USD,Settled,
+TXN-1022,CL006,2026-01-05,Subscription,Global Technology Innovation Fund,725000,USD,Settled,
+TXN-1023,CL006,2026-02-20,Subscription,Private Equity Co-Investment Vehicle - Fund IV,580000,USD,Settled,Capital call 1 of 5.
+TXN-1024,CL007,2026-01-15,Subscription,Meridian Peak Regular Premium Investment-Linked Policy,15000,USD,Settled,Monthly premium payment.
+TXN-1025,CL007,2026-02-15,Subscription,Meridian Peak Regular Premium Investment-Linked Policy,15000,USD,Settled,Monthly premium payment.
+TXN-1026,CL007,2026-03-10,Subscription,Balanced Income & Growth Fund,612500,USD,Settled,
+TXN-1027,CL007,2026-04-05,Subscription,Global Real Estate Income Trust Basket,350000,USD,Settled,
+TXN-1028,CL008,2026-03-15,Subscription,Dual Currency Investment (DCI) - AUD/USD,290000,USD,Settled,No CAR/CKA on file prior to trade - see compliance escalation EML-007.
+TXN-1029,CL008,2026-04-15,Maturity/Rollover,Dual Currency Investment (DCI) - AUD/USD,291885,USD,Settled,AUD/USD settled above strike; principal + yield paid in USD; rolled into new 1-month DCI.
+TXN-1030,CL008,2026-05-15,Maturity/Rollover,Dual Currency Investment (DCI) - AUD/USD,271000,USD,Settled,"AUD/USD settled below strike; principal and yield paid in AUD, converted value below original USD amount - realised FX loss."
+TXN-1031,CL008,2026-01-20,Subscription,Pacific Growth Equity Fund,507500,USD,Settled,
+TXN-1032,CL009,2026-07-19,Subscription,APEX Global Multi-Asset Autocallable Note Series 7,900000,USD,Settled,"Signed risk acknowledgement on file, same date."
+TXN-1033,CL009,2026-07-19,Subscription,Private Equity Co-Investment Vehicle - Fund IV,900000,USD,Settled,Capital call 1 of 5.
+TXN-1034,CL009,2026-07-20,Subscription,Global Technology Innovation Fund,900000,USD,Settled,
+TXN-1035,CL010,2026-01-10,Subscription,Global Bond Income Fund,1080000,USD,Settled,
+TXN-1036,CL010,2026-02-10,Subscription,Meridian Peak Regular Premium Investment-Linked Policy,3000,USD,Settled,Annual premium payment.
+TXN-1037,CL010,2026-05-30,Switch,Balanced Income & Growth Fund,240000,USD,Settled,Switched from money market into balanced fund per review.
+TXN-1038,CL011,2026-01-15,Subscription,APEX Global Multi-Asset Autocallable Note Series 7,775000,USD,Settled,
+TXN-1039,CL011,2026-05-01,Top-up,APEX Global Multi-Asset Autocallable Note Series 7,310000,USD,Settled,Top-up increased position to ~35% of AUM - flagged for concentration review.
+TXN-1040,CL011,2026-02-01,Subscription,Private Equity Co-Investment Vehicle - Fund IV,775000,USD,Settled,Capital call 1 of 5.
+TXN-1041,CL012,2026-01-08,Subscription,Pacific Growth Equity Fund,682500,USD,Settled,
+TXN-1042,CL012,2026-02-14,Subscription,Balanced Income & Growth Fund,585000,USD,Settled,
+TXN-1043,CL012,2026-03-20,Subscription,Global Real Estate Income Trust Basket,292500,USD,Settled,
+TXN-1044,CL013,2025-06-01,Subscription,Pacific Growth Equity Fund,927500,USD,Settled,
+TXN-1045,CL013,2025-06-01,Subscription,Global Technology Innovation Fund,795000,USD,Settled,
+TXN-1046,CL013,2025-09-15,Subscription,Private Equity Co-Investment Vehicle - Fund IV,397500,USD,Settled,Capital call 1 of 5.
+TXN-1047,CL013,2026-08-11,No Action - Pending,Portfolio Rebalancing (Growth to Conservative),0,USD,Pending,Phased rebalancing plan discussed on call 2026-08-11; no trades booked as of the last account review.
+TXN-1048,CL014,2026-01-10,Subscription,Pacific Growth Equity Fund,6625000,USD,Settled,
+TXN-1049,CL014,2026-02-15,Subscription,Private Equity Co-Investment Vehicle - Fund IV,6625000,USD,Settled,Capital call 1 of 5.
+TXN-1050,CL014,2026-03-20,Subscription,Global Bond Income Fund,5300000,USD,Settled,
+TXN-1051,CL014,2026-04-25,Subscription,APEX Global Multi-Asset Autocallable Note Series 7,2650000,USD,Settled,
+TXN-1052,CL015,2026-02-01,Subscription,Global Technology Innovation Fund,1035000,USD,Settled,
+TXN-1053,CL015,2026-03-15,Subscription,APEX Global Multi-Asset Autocallable Note Series 7,690000,USD,Settled,
+TXN-1054,CL015,2026-04-10,Subscription,Private Equity Co-Investment Vehicle - Fund IV,690000,USD,Settled,Capital call 1 of 5.
+TXN-1055,CL015,2026-07-25,Pending Remittance,Cash (Investment Top-Up),60000,USD,Pending,"Proposed LRS remittance - headroom check in progress, see EML-004."
