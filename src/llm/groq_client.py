@@ -4,21 +4,17 @@ from dotenv import load_dotenv
 from groq import Groq
 
 
-# Load variables from .env
 load_dotenv()
 
 
 _client = None
 
-
-DEFAULT_MODEL = "qwen/qwen3.6-27b"
+DEFAULT_MODEL = "openai/gpt-oss-20b"
 
 
 def get_client() -> Groq:
     """
     Create and cache the Groq client.
-
-    GROQ_API_KEY is read from the local .env file.
     """
 
     global _client
@@ -29,13 +25,11 @@ def get_client() -> Groq:
         if not api_key:
             raise RuntimeError(
                 "GROQ_API_KEY is missing.\n"
-                "Add it to your local .env file:\n\n"
+                "Add it to your .env file:\n\n"
                 "GROQ_API_KEY=your_real_key_here"
             )
 
-        _client = Groq(
-            api_key=api_key
-        )
+        _client = Groq(api_key=api_key)
 
     return _client
 
@@ -45,10 +39,7 @@ def generate(
     model: str = DEFAULT_MODEL,
 ) -> str:
     """
-    Send a prompt to Groq and return the generated text.
-
-    This wrapper is deliberately small so the rest of the
-    RAG system does not depend directly on the Groq SDK.
+    Send a prompt to Groq and return the generated answer.
     """
 
     if not prompt.strip():
@@ -63,9 +54,9 @@ def generate(
             {
                 "role": "system",
                 "content": (
-                    "You are a careful wealth-management "
-                    "assistant. Follow the supplied evidence "
-                    "and instructions exactly."
+                    "You are a careful wealth-management assistant. "
+                    "Answer only from the supplied evidence. "
+                    "Do not invent missing facts."
                 ),
             },
             {
@@ -74,11 +65,7 @@ def generate(
             },
         ],
 
-        # Qwen 3.6 supports reasoning_effort='none'
-        # for normal/faster dialogue.
-        reasoning_effort="none",
-
-        temperature=0.2,
+        temperature=0.1,
 
         max_tokens=1200,
     )
@@ -93,9 +80,7 @@ def generate(
 
 def list_available_models() -> list[str]:
     """
-    Return the Groq models available to the current API key.
-
-    Useful when a model ID changes or access differs by account.
+    Return models accessible using the current Groq API key.
     """
 
     client = get_client()
