@@ -7,34 +7,25 @@ def search_documents_tool(
     k: int = 5,
 ) -> list[dict]:
     """
-    Search unstructured documents using query fusion.
+    Search unstructured documents using the selected
+    production retrieval pipeline:
 
-    Both the original and rewritten query are searched.
-    Their candidate results are merged and reranked.
+    semantic retrieval -> CrossEncoder reranking.
     """
-
-    # Do not hard-filter by client ID here.
-    #
-    # Questions about a client may also require global
-    # documents such as policies and product factsheets.
-    where = None
 
     return retrieve(
         question=query,
         k=k,
-        where=where,
+        where=None,
 
-        # Standalone reranking is handled automatically
-        # inside query fusion.
-        use_reranker=False,
-
+        # Selected default based on evaluation
+        use_reranker=True,
         candidate_k=10,
 
-        # Do not replace the original query.
+        # Tested but not enabled by default
         use_query_rewrite=False,
-
-        # Search original + rewritten query.
-        use_query_fusion=True,
+        use_query_fusion=False,
+        use_doc_type_routing=False,
 
         client_id=client_id,
     )
